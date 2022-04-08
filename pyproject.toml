@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "learn-computing"
+version = "0.1.0"
+description = ""
+authors = ["u-ishii <yuki.ishii@ghelia.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+[tool.poetry.dev-dependencies]
+flake8 = "^4.0.1"
+black = "^21.12b0"
+mypy = "^0.931"
+isort = "^5.10.1"
+pytest = "^6.2.5"
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+
+[tool.mypy]
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+]
+
+[build-system]
+requires = ["poetry-core>=1.1.4"]
+build-backend = "poetry.core.masonry.api"
