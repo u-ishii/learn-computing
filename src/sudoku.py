@@ -26,9 +26,14 @@ class SudokuConstraint(Constraint[int, int]):
         self.indices = indices
 
     def satisfied(self, assignment: Dict[int, int]) -> bool:
-        row = [assignment[j] for j in assignment.keys() if j < 9]
-        if len(row) != len(set(row)):
-            return False
+        for i in range(9):
+            group = [assignment[j] for j in assignment.keys() if j // 9 == i]
+            if len(group) != len(set(group)):
+                return False
+        for i in range(9):
+            group = [assignment[j] for j in assignment.keys() if j % 9 == i]
+            if len(group) != len(set(group)):
+                return False
         return True
 
 
