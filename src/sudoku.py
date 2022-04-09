@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from src.csp import CSP, Constraint
 
@@ -23,17 +23,20 @@ class SudokuConstraint(Constraint[int, int]):
 
     def __init__(self, indices: List[int]) -> None:
         super().__init__(indices)
-        self.indices = indices
 
     def satisfied(self, assignment: Dict[int, int]) -> bool:
         for i in range(9):
-            group = [assignment[j] for j in assignment.keys() if j // 9 == i]
-            if len(group) != len(set(group)):
+            row = [assignment[j] for j in assignment.keys() if j // 9 == i]
+            if len(row) != len(set(row)):
                 return False
-        for i in range(9):
-            group = [assignment[j] for j in assignment.keys() if j % 9 == i]
-            if len(group) != len(set(group)):
+            col = [assignment[j] for j in assignment.keys() if j % 9 == i]
+            if len(col) != len(set(col)):
                 return False
+        for x in range(3):
+            for y in range(3):
+                block = [assignment[j] for j in assignment.keys() if j // 9 // 3 == x and j % 9 // 3 == y]
+                if len(block) != len(set(block)):
+                    return False
         return True
 
 
