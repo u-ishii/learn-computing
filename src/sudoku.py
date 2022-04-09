@@ -7,29 +7,44 @@ def main() -> None:
     indices: List[int] = [i for i in range(81)]
     sudoku = {index: [1, 2, 3, 4, 5, 6, 7, 8, 9] for index in indices}
     csp: CSP[int, int] = CSP(indices, sudoku)
-    csp.add_constraint(SudokuConstraint(indices))
+    constraint = SudokuConstraint(indices)
+    csp.add_constraint(constraint)
     solution = csp.backtracking_search()
     if solution is None:
         print("No solution found!")
     else:
-        _render_sudoku(solution)
+        skip = 0
+        for past in constraint.history:
+            if skip > 0:
+                skip -= 1
+            else:
+                line = input()
+                if len(line) > 0:
+                    skip = int(line)
+                _render_sudoku(past)
 
 
 def _render_sudoku(sudoku: Dict[int, int]) -> None:
     for y in range(9):
+        if y != 0 and y % 3 == 0:
+            print("─" * 6 + "┼" + "─" * 6 + "┼" + "─" * 6)
         for x in range(9):
-            print(chr(ord("０") + sudoku[y * 9 + x]), end="")
+            if x != 0 and x % 3 == 0:
+                print("│", end="")
+            i = y * 9 + x
+            cell = chr(ord("０") + sudoku[i]) if i in sudoku else "  "
+            print(cell, end="")
         print()
+    print()
 
 
 class SudokuConstraint(Constraint[int, int]):
-
-    numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9}
-
     def __init__(self, indices: List[int]) -> None:
         super().__init__(indices)
+        self.history: List[Dict[int, int]] = []
 
     def satisfied(self, assignment: Dict[int, int]) -> bool:
+        self.history.append(assignment)
         for i in range(9):
             row = [assignment[j] for j in assignment.keys() if j // 9 == i]
             if len(row) != len(set(row)):
