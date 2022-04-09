@@ -12,9 +12,14 @@ def main() -> None:
     if solution is None:
         print("No solution found!")
     else:
-        for i in range(9):
-            print("".join([str(solution[i * 9 + j]) for j in range(9)]))
-        print(solution)
+        _render_sudoku(solution)
+
+
+def _render_sudoku(sudoku: Dict[int, int]) -> None:
+    for y in range(9):
+        for x in range(9):
+            print(chr(ord("０") + sudoku[y * 9 + x]), end="")
+        print()
 
 
 class SudokuConstraint(Constraint[int, int]):
