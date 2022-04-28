@@ -7,12 +7,12 @@ Sudoku = Dict[int, int]
 def print_sudoku_history(sudoku_history: List[Sudoku]) -> None:
     turn = 1
     for past in sudoku_history:
-        print(f"turn: {turn}\n{_convert_sudoku_text(past)}")
+        print(f"turn: {turn}\n{convert_sudoku_text(past)}")
         turn += 1
         time.sleep(0.01)
 
 
-def _convert_sudoku_text(sudoku: Sudoku) -> str:
+def convert_sudoku_text(sudoku: Sudoku) -> str:
     lines: List[str] = []
     for y in range(9):
         if y != 0 and y % 3 == 0:
