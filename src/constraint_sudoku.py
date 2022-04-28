@@ -1,8 +1,8 @@
 import random
-import time
 from typing import Dict, List
 
 from src.csp import CSP, Constraint
+from src.sudoku import print_sudoku_history
 
 
 def main() -> None:
@@ -16,27 +16,7 @@ def main() -> None:
         print("No solution found!")
     else:
         input("render?")
-        turn = 1
-        for past in constraint.history:
-            print(f"turn: {turn}\n{_convert_sudoku_text(past)}")
-            turn += 1
-            time.sleep(0.01)
-
-
-def _convert_sudoku_text(sudoku: Dict[int, int]) -> str:
-    lines: List[str] = []
-    for y in range(9):
-        if y != 0 and y % 3 == 0:
-            lines.append("─" * 6 + "┼" + "─" * 6 + "┼" + "─" * 6)
-        number_line = ""
-        for x in range(9):
-            if x != 0 and x % 3 == 0:
-                number_line += "│"
-            i = y * 9 + x
-            cell = chr(ord("０") + sudoku[i]) if i in sudoku else "  "
-            number_line += cell
-        lines.append(number_line)
-    return "\n".join(lines)
+        print_sudoku_history(constraint.history)
 
 
 class SudokuConstraint(Constraint[int, int]):
