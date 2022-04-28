@@ -35,7 +35,7 @@ class SelectionType(Enum):
 C = TypeVar("C", bound=Chromosome)
 
 
-class GenericAlgorithm(Generic[C]):
+class GeneticAlgorithm(Generic[C]):
     def __init__(
         self,
         initial_population: List[C],
