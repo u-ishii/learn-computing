@@ -5,9 +5,6 @@ from typing import List, Tuple
 from src.genetic import Chromosome, GeneticAlgorithm
 from src.sudoku import Sudoku, convert_sudoku_text
 
-_SUDOKU_INDICES = list(range(81))
-_SUDOKU_CANDIDATES = list(range(1, 10))
-
 
 def main() -> None:
     initial_population: List[SudokuChromosome] = [SudokuChromosome.random_instance() for _ in range(20)]
@@ -15,8 +12,7 @@ def main() -> None:
         initial_population=initial_population,
         threshold=9 * 3 * 9,
         mutation_chance=0.5,
-        crossover_chance=0,
-        max_generatios=100,
+        max_generatios=1000,
     )
     result = algorithm.run()
     print(result)
@@ -56,18 +52,19 @@ class SudokuChromosome(Chromosome):
     def random_instance(cls) -> "SudokuChromosome":
         random_values: Sudoku = {}
         for i in range(9):
-            candidates = [*_SUDOKU_CANDIDATES]
+            candidates = list(range(1, 10))
             random.shuffle(candidates)
             new_values = dict(zip(range(i * 9, (i + 1) * 9), candidates))
             random_values = {**random_values, **new_values}
         return SudokuChromosome(random_values)
 
-    def crossover(self: "SudokuChromosome", other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
+    def crossover(self, other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
         child_values1: Sudoku = {**self.values}
         child_values2: Sudoku = {**other.values}
-        for i in _SUDOKU_INDICES:
+        for row_range in _get_row_ranges():
             if random.choice((True, False)):
-                child_values1[i], child_values2[i] = child_values2[i], child_values1[i]
+                for i in row_range:
+                    child_values1[i], child_values2[i] = child_values2[i], child_values1[i]
         return SudokuChromosome(child_values1), SudokuChromosome(child_values2)
 
     def mutate(self) -> None:
