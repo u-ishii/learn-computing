@@ -41,9 +41,9 @@ class SudokuChromosome(Chromosome):
 
     @classmethod
     def random_instance(cls) -> "SudokuChromosome":
-        candidates = list(range(1, 10))
-        random_values: Sudoku = {i: random.choice(candidates) for i in _SUDOKU_INDICES}
-        return SudokuChromosome(random_values)
+        values = [(i % 9) + 1 for i in _SUDOKU_INDICES]
+        random.shuffle(values)
+        return SudokuChromosome(dict(zip(_SUDOKU_INDICES, values)))
 
     def crossover(self: "SudokuChromosome", other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
         child_values1: Sudoku = {**self.values}
