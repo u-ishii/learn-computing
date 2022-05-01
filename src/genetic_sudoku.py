@@ -1,5 +1,6 @@
+import functools
 import random
-from typing import Tuple
+from typing import List, Tuple
 
 from src.genetic import Chromosome, GeneticAlgorithm
 from src.sudoku import Sudoku, convert_sudoku_text
@@ -8,13 +9,24 @@ _SUDOKU_INDICES = [i for i in range(81)]
 
 
 def main() -> None:
-    print(SudokuChromosome.random_instance())
-    # initial_population: List[Equation] = [Equation.random_instance() for _ in range(20)]
-    # algorithm: GeneticAlgorithm[Equation] = GeneticAlgorithm(
-    #     initial_population=initial_population, threshold=13.0, mutation_chance=0.1
-    # )
-    # result = algorithm.run()
-    # print(result)
+    initial_population: List[SudokuChromosome] = [SudokuChromosome.random_instance() for _ in range(20)]
+    algorithm: GeneticAlgorithm[SudokuChromosome] = GeneticAlgorithm(
+        initial_population=initial_population,
+        threshold=27.0,
+        mutation_chance=0.1,
+        max_generatios=100,
+        # selection_type=SelectionType.ROULETTE,
+    )
+    result = algorithm.run()
+    print(result)
+
+
+@functools.lru_cache()
+def _get_constraint_ranges() -> List[List[int]]:
+    return [
+        *[list(range(i * 9, (i + 1) * 9)) for i in range(9)],
+        *[list(range(i, 81, 9)) for i in range(9)],
+    ]
 
 
 class SudokuChromosome(Chromosome):
@@ -22,7 +34,12 @@ class SudokuChromosome(Chromosome):
         self.values: Sudoku = values
 
     def fitness(self) -> float:
-        return 1
+        result = 0
+        for constarint_range in _get_constraint_ranges():
+            block = [self.values[i] for i in constarint_range]
+            if len(block) == len(set(block)):
+                result += 1
+        return result
 
     @classmethod
     def random_instance(cls) -> "SudokuChromosome":
@@ -35,15 +52,11 @@ class SudokuChromosome(Chromosome):
         return SudokuChromosome(random_values)
 
     def crossover(self: "SudokuChromosome", other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
-        child_values1: Sudoku = {}
-        child_values2: Sudoku = {}
+        child_values1: Sudoku = {**self.values}
+        child_values2: Sudoku = {**other.values}
         for i in _SUDOKU_INDICES:
-            if i % 2 == 0:
-                child_values1[i] = self.values[i]
-                child_values2[i] = other.values[i]
-            else:
-                child_values1[i] = other.values[i]
-                child_values2[i] = self.values[i]
+            if random.choice((True, False)):
+                child_values1[i], child_values2[i] = child_values2[i], child_values1[i]
         return SudokuChromosome(child_values1), SudokuChromosome(child_values2)
 
     def mutate(self) -> None:
@@ -53,7 +66,7 @@ class SudokuChromosome(Chromosome):
         self.values[index] = random.choice(list(candidates))
 
     def __str__(self) -> str:
-        return f"{convert_sudoku_text(self.values)} Fitness {self.fitness()}"
+        return f"{convert_sudoku_text(self.values)}\nFitness {self.fitness()}"
 
 
 main()
