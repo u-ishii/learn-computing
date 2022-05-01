@@ -12,7 +12,7 @@ def main() -> None:
         initial_population=initial_population,
         threshold=9 * 3 * 9,
         mutation_chance=0.5,
-        max_generatios=1000,
+        max_generatios=2000,
     )
     result = algorithm.run()
     print(result)
@@ -41,11 +41,12 @@ class SudokuChromosome(Chromosome):
         self.values: Sudoku = values
 
     def fitness(self) -> float:
-        self._validate_values()
+        assert self._validate_values()
         result = 0
         for constarint_range in _get_constraint_ranges():
             block = [self.values[i] for i in constarint_range]
-            result += len(set(block))
+            if len(block) == len(set(block)):
+                result += 1
         return result
 
     @classmethod
@@ -72,9 +73,11 @@ class SudokuChromosome(Chromosome):
         i1, i2 = random.sample(row_range, k=2)
         self.values[i1], self.values[i2] = self.values[i2], self.values[i1]
 
-    def _validate_values(self) -> None:
+    def _validate_values(self) -> bool:
         for row_range in _get_row_ranges():
-            assert len({self.values[i] for i in row_range}) == 9
+            if len({self.values[i] for i in row_range}) != 9:
+                return False
+        return True
 
     def __str__(self) -> str:
         return f"{convert_sudoku_text(self.values)}\nFitness {self.fitness()}"
