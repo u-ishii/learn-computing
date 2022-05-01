@@ -42,7 +42,7 @@ class GeneticAlgorithm(Generic[C]):
         threshold: float,
         max_generatios: int = 100,
         mutation_chance: float = 0.01,
-        crossover_chance=0.7,
+        crossover_chance: float = 0.7,
         selection_type: SelectionType = SelectionType.TOURNAMENT,
     ):
         self._population: List[C] = initial_population

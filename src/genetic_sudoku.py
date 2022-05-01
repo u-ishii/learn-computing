@@ -12,10 +12,9 @@ def main() -> None:
     initial_population: List[SudokuChromosome] = [SudokuChromosome.random_instance() for _ in range(20)]
     algorithm: GeneticAlgorithm[SudokuChromosome] = GeneticAlgorithm(
         initial_population=initial_population,
-        threshold=27.0,
-        mutation_chance=0.1,
-        max_generatios=100,
-        # selection_type=SelectionType.ROULETTE,
+        threshold=9 * 3 * 9,
+        mutation_chance=0.5,
+        max_generatios=10000,
     )
     result = algorithm.run()
     print(result)
@@ -37,18 +36,13 @@ class SudokuChromosome(Chromosome):
         result = 0
         for constarint_range in _get_constraint_ranges():
             block = [self.values[i] for i in constarint_range]
-            if len(block) == len(set(block)):
-                result += 1
+            result += len(set(block))
         return result
 
     @classmethod
     def random_instance(cls) -> "SudokuChromosome":
-        random_values: Sudoku = {}
-        for i in range(9):
-            candidates = list(range(1, 10))
-            random.shuffle(candidates)
-            new_values = dict(zip(range(i * 9, (i + 1) * 9), candidates))
-            random_values = {**random_values, **new_values}
+        candidates = list(range(1, 10))
+        random_values: Sudoku = {i: random.choice(candidates) for i in _SUDOKU_INDICES}
         return SudokuChromosome(random_values)
 
     def crossover(self: "SudokuChromosome", other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
