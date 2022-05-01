@@ -10,9 +10,9 @@ def main() -> None:
     initial_population: List[SudokuChromosome] = [SudokuChromosome.random_instance() for _ in range(20)]
     algorithm: GeneticAlgorithm[SudokuChromosome] = GeneticAlgorithm(
         initial_population=initial_population,
-        threshold=9 * 3 * 9,
+        threshold=9 * 3,
         mutation_chance=0.5,
-        max_generatios=2000,
+        max_generatios=10000,
     )
     result = algorithm.run()
     print(result)
@@ -29,10 +29,17 @@ def _get_col_ranges() -> List[List[int]]:
 
 
 @functools.lru_cache()
+def _get_block_ranges() -> List[List[int]]:
+    base = [0, 1, 2, 9, 10, 11, 18, 19, 20]
+    return [[v + (j * 3) + (i * 27) for v in base] for i in range(3) for j in range(3)]
+
+
+@functools.lru_cache()
 def _get_constraint_ranges() -> List[List[int]]:
     return [
         *_get_row_ranges(),
         *_get_col_ranges(),
+        *_get_block_ranges(),
     ]
 
 
@@ -80,7 +87,7 @@ class SudokuChromosome(Chromosome):
         return True
 
     def __str__(self) -> str:
-        return f"{convert_sudoku_text(self.values)}\nFitness {self.fitness()}"
+        return f"{convert_sudoku_text(self.values)}\nFitness: {self.fitness()}"
 
 
 main()
