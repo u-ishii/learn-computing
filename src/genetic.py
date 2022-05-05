@@ -53,20 +53,21 @@ class GeneticAlgorithm(Generic[C]):
         self._selection_type: SelectionType = selection_type
         self._fitness_key: Callable[[C], float] = type(self._population[0]).fitness
 
-    def _pick_roulette(self, wheel: List[float]) -> Tuple[C, C]:
+    def _pick_roulette(self) -> Tuple[C, C]:
+        wheel = [x.fitness() for x in self._population]
         chosen = random.choices(self._population, weights=wheel, k=2)
         return chosen[0], chosen[1]
 
-    def _pick_tournament(self, num_participants: int) -> Tuple[C, C]:
-        participants = random.choices(self._population, k=num_participants)
+    def _pick_tournament(self) -> Tuple[C, C]:
+        participants = random.choices(self._population, k=(len(self._population) // 2))
         chosen = heapq.nlargest(2, participants, key=self._fitness_key)
         return chosen[0], chosen[1]
 
     def _pick_parents(self) -> Tuple[C, C]:
         if self._selection_type == SelectionType.ROULETTE:
-            return self._pick_roulette([x.fitness() for x in self._population])
+            return self._pick_roulette()
         else:
-            return self._pick_tournament(len(self._population) // 2)
+            return self._pick_tournament()
 
     def _reproduce_and_replace(self) -> None:
         new_population: List[C] = []
