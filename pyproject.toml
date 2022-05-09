@@ -6,6 +6,7 @@ authors = ["u-ishii <yuki.ishii@ghelia.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+matplotlib = "^3.5.2"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
