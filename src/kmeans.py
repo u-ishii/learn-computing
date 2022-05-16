@@ -2,9 +2,8 @@ import functools
 import math
 import random
 import statistics
-from copy import deepcopy
 from dataclasses import dataclass
-from typing import Generic, Iterable, Iterator, List, Sequence, Tuple, TypeVar
+from typing import Generic, Iterable, Iterator, List, Optional, Sequence, Tuple, TypeVar
 
 
 def calc_z_scores(original: Sequence[float]) -> List[float]:
@@ -30,8 +29,7 @@ class DataPoint:
         return math.sqrt(sum(differences))
 
     def __eq__(self, other: object) -> bool:
-        assert isinstance(other, DataPoint)
-        return self.dimensions == other.dimensions
+        return isinstance(other, DataPoint) and self.dimensions == other.dimensions
 
     def __repr__(self) -> str:
         return self._originals.__repr__()
@@ -40,28 +38,38 @@ class DataPoint:
 P = TypeVar("P", bound=DataPoint)
 
 
-@dataclass()
+@dataclass(frozen=True)
 class Cluster(Generic[P]):
-    points: List[P]
-    centroid: DataPoint
+    points: Tuple[P, ...]
+    centroid: Optional[DataPoint]
 
 
 class KMeans(Generic[P]):
-    points: List[P]
+    points: Tuple[P, ...]
 
     def __init__(self, k: int, points: List[P]):
         assert k > 1
         self._points = points
         self._normalize_z_score()
-        self._clusters: List[Cluster[P]] = []
-        for _ in range(k):
-            rand_point = self._generate_random_point()
-            cluster: Cluster[P] = Cluster([], rand_point)
-            self._clusters.append(cluster)
+        initial_clusters: List[Cluster[P]] = [Cluster((), self._generate_random_point()) for _ in range(k)]
+        self._cluster_histories: List[List[Cluster[P]]] = [initial_clusters]
 
     @property
-    def _centroids(self) -> List[DataPoint]:
+    def _clusters(self) -> List[Cluster[P]]:
+        return self._cluster_histories[-1]
+
+    @property
+    def _centroids(self) -> List[Optional[DataPoint]]:
         return [x.centroid for x in self._clusters]
+
+    @property
+    def _not_empty_centroids(self) -> List[DataPoint]:
+        return [x for x in self._centroids if x is not None]
+
+    @property
+    def _is_stable(self) -> bool:
+        old_centroids = [x.centroid for x in self._cluster_histories[-2]]
+        return self._centroids == old_centroids
 
     def _slice_dimension(self, dimension: int) -> List[float]:
         return [x.dimensions[dimension] for x in self._points]
@@ -83,37 +91,45 @@ class KMeans(Generic[P]):
             rand_dimensions.append(rand_value)
         return DataPoint(rand_dimensions)
 
-    def _assign_clusters(self) -> None:
+    def _generate_next_cluster_points(self) -> List[List[P]]:
+        next_cluster_points: List[List[P]] = [[] for _ in range(len(self._clusters))]
         for point in self._points:
-            closest = min(self._centroids, key=functools.partial(DataPoint.distance, point))
+            closest = min(self._not_empty_centroids, key=functools.partial(DataPoint.distance, point))
             i = self._centroids.index(closest)
-            self._clusters[i].points.append(point)
+            next_cluster_points[i].append(point)
+        return next_cluster_points
 
-    def _generate_centroids(self) -> None:
-        for cluster in self._clusters:
-            if len(cluster.points) == 0:
-                continue
-            means: List[float] = []
-            for dimension in range(cluster.points[0].num_dimensions):
-                dimension_slice = [p.dimensions[dimension] for p in cluster.points]
-                means.append(statistics.mean(dimension_slice))
-            cluster.centroid = DataPoint(means)
+    def _generate_next_centroid(self, next_points: List[P]) -> Optional[DataPoint]:
+        if len(next_points) == 0:
+            return None
+        means: List[float] = []
+        for dimension in range(next_points[0].num_dimensions):
+            dimension_slice = [p.dimensions[dimension] for p in next_points]
+            means.append(statistics.mean(dimension_slice))
+        return DataPoint(means)
 
-    def run(self, max_iterations: int = 100) -> List[Cluster]:
+    def _generate_next_centroids(self, next_cluster_points: List[List[P]]) -> List[Optional[DataPoint]]:
+        return [self._generate_next_centroid(next_points) for next_points in next_cluster_points]
+
+    def run(self, max_iterations: int = 100) -> List[List[Cluster]]:
         for iteration in range(max_iterations):
-            for cluster in self._clusters:
-                cluster.points.clear()
-            self._assign_clusters()
-            old_centroids: List[DataPoint] = deepcopy(self._centroids)
-            self._generate_centroids()
-            if old_centroids == self._centroids:
+            next_cluster_points = self._generate_next_cluster_points()
+            next_centroids = self._generate_next_centroids(next_cluster_points)
+            self._cluster_histories.append(
+                [Cluster(tuple(points), centroid) for points, centroid in zip(next_cluster_points, next_centroids)]
+            )
+            if self._is_stable:
                 print(f"Converged after {iteration} iterations")
-                return self._clusters
-        return self._clusters
+                break
+        return self._cluster_histories
+
+
+def main() -> None:
+    k_means = KMeans(2, [DataPoint([2, 1, 1]), DataPoint([2, 2, 5]), DataPoint([3, 1.5, 2.5])])
+    clusters = k_means.run()[-1]
+    for index, cluster in enumerate(clusters):
+        print(f"Cluster {index}: {cluster.points}")
 
 
 if __name__ == "__main__":
-    k_means = KMeans(2, [DataPoint([2, 1, 1]), DataPoint([2, 2, 5]), DataPoint([3, 1.5, 2.5])])
-    clusters = k_means.run()
-    for index, cluster in enumerate(clusters):
-        print(f"Cluster {index}: {cluster.points}")
+    main()
