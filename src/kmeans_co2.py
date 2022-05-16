@@ -70,6 +70,13 @@ def _convert_as_scatter_params(clusters: List[Cluster[Co2Point]]) -> ScatterPara
     return ScatterParams(x=gdp_amounts, y=co2_amounts, c=cluster_indices)
 
 
+def _convert_as_centroid_params(clusters: List[Cluster[Co2Point]]) -> ScatterParams:
+    gdp_positions, co2_positions, cluster_indices = zip(
+        *[(*cluster.centroid.dimensions, i) for i, cluster in enumerate(clusters) if cluster.centroid is not None]
+    )
+    return ScatterParams(x=gdp_positions, y=co2_positions, c=cluster_indices)
+
+
 def _convert_as_annotate_params(clusters: List[Cluster[Co2Point]]) -> List[AnnotateParams]:
     return [
         AnnotateParams(point.country_name, (point.gdp_amount, point.co2_amount))
@@ -93,7 +100,13 @@ if __name__ == "__main__":
     figure = plt.figure()
     animation = anm.ArtistAnimation(
         figure,
-        [[plt.scatter(**_convert_as_scatter_params(clusters).__dict__)] for clusters in cluster_histories[1:]],
+        [
+            [
+                plt.scatter(**_convert_as_scatter_params(clusters).__dict__),
+                plt.scatter(**_convert_as_centroid_params(clusters).__dict__, marker="*", edgecolors="black"),
+            ]
+            for clusters in cluster_histories[1:]
+        ],
         interval=200,
         repeat=False,
     )
