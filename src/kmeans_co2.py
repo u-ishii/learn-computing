@@ -39,11 +39,11 @@ class AnnotateParams:
 
 
 def _read_gdp_rows() -> List[CsvRow]:
-    return _read_csv_rows("dyn")
+    return _read_csv_rows("gdp")
 
 
 def _read_co2_rows() -> List[CsvRow]:
-    return _read_csv_rows("co2")
+    return _read_csv_rows("gdp-growth")
 
 
 def _read_csv_rows(name: str) -> List[CsvRow]:
@@ -52,7 +52,7 @@ def _read_csv_rows(name: str) -> List[CsvRow]:
         return [
             CsvRow(row["Country Name"], row["Country Code"], float(row["2018"]))
             for row in reader
-            if len(row["2018"]) > 0
+            if len(row["2020"]) > 0 and row["Country Code"] != "WLD"
         ]
 
 
