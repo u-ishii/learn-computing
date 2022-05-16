@@ -37,7 +37,7 @@ class AnnotateParams:
 
 
 def _read_gdp_rows() -> List[CsvRow]:
-    return _read_csv_rows("gdp")
+    return _read_csv_rows("dyn")
 
 
 def _read_co2_rows() -> List[CsvRow]:
@@ -90,6 +90,4 @@ if __name__ == "__main__":
     for index, cluster in enumerate(clusters):
         print(f"Cluster {index}: {len(cluster.points)}")
     plt.scatter(**_convert_as_scatter_params(clusters).__dict__)
-    for params in _convert_as_annotate_params(clusters):
-        plt.annotate(params.s, params.xy)
     plt.show()
