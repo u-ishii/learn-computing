@@ -64,7 +64,12 @@ def _merge_csv_rows(gdp_rows: List[CsvRow], co2_rows: List[CsvRow]) -> List[Tupl
 
 def _convert_as_scatter_params(clusters: List[Cluster[Co2Point]]) -> ScatterParams:
     gdp_amounts, co2_amounts, cluster_indices = zip(
-        *[(point.gdp_amount, point.co2_amount, i) for i, cluster in enumerate(clusters) for point in cluster.points]
+        *[
+            (point.gdp_amount, point.co2_amount, i)
+            for i, cluster in enumerate(clusters)
+            for point in cluster.points
+            if len(cluster.points) > 0
+        ]
     )
     return ScatterParams(x=gdp_amounts, y=co2_amounts, c=cluster_indices)
 
