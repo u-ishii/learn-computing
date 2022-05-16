@@ -2,6 +2,7 @@ import csv
 from dataclasses import dataclass
 from typing import List, Sequence, Tuple
 
+import matplotlib.animation as anm
 import matplotlib.pyplot as plt
 
 from src.kmeans import Cluster, DataPoint, KMeans
@@ -64,12 +65,7 @@ def _merge_csv_rows(gdp_rows: List[CsvRow], co2_rows: List[CsvRow]) -> List[Tupl
 
 def _convert_as_scatter_params(clusters: List[Cluster[Co2Point]]) -> ScatterParams:
     gdp_amounts, co2_amounts, cluster_indices = zip(
-        *[
-            (point.gdp_amount, point.co2_amount, i)
-            for i, cluster in enumerate(clusters)
-            for point in cluster.points
-            if len(cluster.points) > 0
-        ]
+        *[(point.gdp_amount, point.co2_amount, i) for i, cluster in enumerate(clusters) for point in cluster.points]
     )
     return ScatterParams(x=gdp_amounts, y=co2_amounts, c=cluster_indices)
 
@@ -91,8 +87,14 @@ if __name__ == "__main__":
         for gdp_row, co2_row in merged_rows
     ]
     k_means = KMeans(7, co2_points)
-    clusters = k_means.run()
-    for index, cluster in enumerate(clusters):
+    cluster_histories = k_means.run()
+    for index, cluster in enumerate(cluster_histories[-1]):
         print(f"Cluster {index}: {len(cluster.points)}")
-    plt.scatter(**_convert_as_scatter_params(clusters).__dict__)
+    figure = plt.figure()
+    animation = anm.ArtistAnimation(
+        figure,
+        [[plt.scatter(**_convert_as_scatter_params(clusters).__dict__)] for clusters in cluster_histories[1:]],
+        interval=200,
+        repeat=False,
+    )
     plt.show()
