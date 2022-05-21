@@ -1,7 +1,7 @@
 import csv
 import statistics
 from dataclasses import dataclass
-from typing import List, Sequence, Tuple
+from typing import List, Tuple
 
 import matplotlib.animation as anm
 import matplotlib.pyplot as plt
@@ -23,19 +23,6 @@ class Co2Point(DataPoint):
         self.country_name: str = country_name
         self.gdp_amount: float = gdp_amount
         self.co2_amount: float = co2_amount
-
-
-@dataclass
-class ScatterParams:
-    x: Sequence[int]
-    y: Sequence[int]
-    c: Sequence[int]
-
-
-@dataclass
-class AnnotateParams:
-    s: str
-    xy: Tuple[float, float]
 
 
 def _read_gdp_rows() -> List[CsvRow]:
@@ -64,7 +51,7 @@ def _merge_csv_rows(gdp_rows: List[CsvRow], co2_rows: List[CsvRow]) -> List[Tupl
     return [(key_gdp_rows[code], key_co2_rows[code]) for code in country_codes]
 
 
-def _convert_as_scatter_params(clusters: List[Cluster[Co2Point]]) -> ScatterParams:
+def _scatter_points(clusters: List[Cluster[Co2Point]]):
     gdp_amounts, co2_amounts, cluster_indices = zip(
         *[
             (point.gdp_amount, point.co2_amount, i)
@@ -73,10 +60,10 @@ def _convert_as_scatter_params(clusters: List[Cluster[Co2Point]]) -> ScatterPara
             if len(cluster.points) > 0
         ]
     )
-    return ScatterParams(x=gdp_amounts, y=co2_amounts, c=cluster_indices)
+    return plt.scatter(x=gdp_amounts, y=co2_amounts, c=cluster_indices)
 
 
-def _convert_as_centroid_params(clusters: List[Cluster[Co2Point]]) -> ScatterParams:
+def _scatter_centroids(clusters: List[Cluster[Co2Point]], **kwargs):
     gdp_positions, co2_positions, cluster_indices = zip(
         *[
             (
@@ -88,15 +75,7 @@ def _convert_as_centroid_params(clusters: List[Cluster[Co2Point]]) -> ScatterPar
             if len(cluster.points) > 0
         ]
     )
-    return ScatterParams(x=gdp_positions, y=co2_positions, c=cluster_indices)
-
-
-def _convert_as_annotate_params(clusters: List[Cluster[Co2Point]]) -> List[AnnotateParams]:
-    return [
-        AnnotateParams(point.country_name, (point.gdp_amount, point.co2_amount))
-        for cluster in clusters
-        for point in cluster.points
-    ]
+    return plt.scatter(x=gdp_positions, y=co2_positions, c=cluster_indices, **kwargs)
 
 
 if __name__ == "__main__":
@@ -116,12 +95,12 @@ if __name__ == "__main__":
         figure,
         [
             [
-                plt.scatter(**_convert_as_scatter_params(clusters).__dict__),
-                plt.scatter(**_convert_as_centroid_params(clusters).__dict__, marker="*", edgecolors="black"),
+                _scatter_points(clusters),
+                _scatter_centroids(clusters, marker="*", edgecolors="black"),
             ]
             for clusters in cluster_histories[1:]
         ],
-        interval=200,
+        interval=1000,
         repeat=False,
     )
     plt.show()
