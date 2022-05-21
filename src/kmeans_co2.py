@@ -86,8 +86,8 @@ if __name__ == "__main__":
         Co2Point(gdp_row.country_code, gdp_row.country_name, gdp_row.amount, co2_row.amount)
         for gdp_row, co2_row in merged_rows
     ]
-    k_means = KMeans(7, co2_points)
-    cluster_histories = k_means.run()
+    k_means = KMeans(co2_points)
+    cluster_histories = k_means.run(7)
     for index, cluster in enumerate(cluster_histories[-1]):
         print(f"Cluster {index}: {len(cluster.points)}")
     figure = plt.figure()
@@ -98,7 +98,7 @@ if __name__ == "__main__":
                 _scatter_points(clusters),
                 _scatter_centroids(clusters, marker="*", edgecolors="black"),
             ]
-            for clusters in cluster_histories[1:]
+            for clusters in cluster_histories
         ],
         interval=1000,
         repeat=False,
