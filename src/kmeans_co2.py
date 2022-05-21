@@ -30,7 +30,7 @@ def _read_gdp_rows() -> List[CsvRow]:
 
 
 def _read_co2_rows() -> List[CsvRow]:
-    return _read_csv_rows("gdp-growth")
+    return _read_csv_rows("dyn")
 
 
 def _read_csv_rows(name: str) -> List[CsvRow]:
@@ -39,7 +39,7 @@ def _read_csv_rows(name: str) -> List[CsvRow]:
         return [
             CsvRow(row["Country Name"], row["Country Code"], float(row["2018"]))
             for row in reader
-            if len(row["2020"]) > 0 and row["Country Code"] != "WLD"
+            if len(row["2018"]) > 0 and row["Country Code"] != "WLD"
         ]
 
 
@@ -60,7 +60,7 @@ def _scatter_points(clusters: List[Cluster[Co2Point]]):
             if len(cluster.points) > 0
         ]
     )
-    return plt.scatter(x=gdp_amounts, y=co2_amounts, c=cluster_indices)
+    return plt.scatter(x=gdp_amounts, y=co2_amounts, c=cluster_indices, s=5)
 
 
 def _scatter_centroids(clusters: List[Cluster[Co2Point]], **kwargs):
