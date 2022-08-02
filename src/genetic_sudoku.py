@@ -12,7 +12,7 @@ def main() -> None:
         initial_population=initial_population,
         threshold=9 * 3,
         mutation_chance=0.5,
-        max_generatios=10000,
+        max_generations=10000,
     )
     result = algorithm.run()
     print(result)
@@ -50,8 +50,8 @@ class SudokuChromosome(Chromosome):
     def fitness(self) -> float:
         assert self._validate_values()
         result = 0
-        for constarint_range in _get_constraint_ranges():
-            block = [self.values[i] for i in constarint_range]
+        for constraint_range in _get_constraint_ranges():
+            block = [self.values[i] for i in constraint_range]
             if len(block) == len(set(block)):
                 result += 1
         return result

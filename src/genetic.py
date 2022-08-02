@@ -40,14 +40,14 @@ class GeneticAlgorithm(Generic[C]):
         self,
         initial_population: List[C],
         threshold: float,
-        max_generatios: int = 100,
+        max_generations: int = 100,
         mutation_chance: float = 0.01,
         crossover_chance: float = 0.7,
         selection_type: SelectionType = SelectionType.TOURNAMENT,
     ):
         self._population: List[C] = initial_population
         self._threshold: float = threshold
-        self._max_generations: int = max_generatios
+        self._max_generations: int = max_generations
         self._mutation_chance: float = mutation_chance
         self._crossover_chance: float = crossover_chance
         self._selection_type: SelectionType = selection_type
