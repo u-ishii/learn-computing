@@ -66,8 +66,8 @@ class SudokuChromosome(Chromosome):
         child_values1: Sudoku = {**self.values}
         child_values2: Sudoku = {**other.values}
         for row_col_range in random.choice((_get_row_ranges(), _get_col_ranges())):
-            if random.choice((True, False)):
-                for i in row_col_range:
+            for i in row_col_range:
+                if random.choice((True, False)):
                     child_values1[i], child_values2[i] = child_values2[i], child_values1[i]
         # fmt: off
         assert sum(child_values1.values()) + sum(child_values2.values()) == sum(self.values.values()) + sum(other.values.values())  # noqa: E501
