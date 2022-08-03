@@ -86,7 +86,8 @@ class GeneticAlgorithm(Generic[C]):
         for generation in range(self._max_generations):
             if best.fitness() >= self._threshold:
                 return best
-            print(f"Generation {generation} Best {best.fitness()} Avg {mean(map(self._fitness_key, self._population))}")
+            if generation % 100 == 0:
+                print(f"{generation}\t{best.fitness()}\t{mean(map(self._fitness_key, self._population))}")
             self._reproduce_and_replace()
             highest: C = max(self._population, key=self._fitness_key)
             if highest.fitness() > best.fitness():

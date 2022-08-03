@@ -12,7 +12,7 @@ def main() -> None:
         initial_population=initial_population,
         threshold=9 * 9 * 3,
         mutation_chance=0.05,
-        max_generations=10000,
+        max_generations=100000,
     )
     result = algorithm.run()
     print(result)
