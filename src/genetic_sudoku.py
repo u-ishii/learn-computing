@@ -83,6 +83,7 @@ class SudokuChromosome(Chromosome):
         for value in self.values:
             times[value] += 1
         new_value = sorted(candidates, key=lambda x: times[x])[0]
+        assert times[new_value] <= 9
         mutated_values: Sudoku = [*self.values]
         mutated_values[random.choice(range(81))] = new_value
         return SudokuChromosome(mutated_values)
