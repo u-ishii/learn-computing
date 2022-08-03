@@ -59,30 +59,26 @@ class SudokuChromosome(Chromosome):
     def random_instance(cls) -> "SudokuChromosome":
         candidates = [i for _ in range(9) for i in range(1, 10)]
         random.shuffle(candidates)
-        values: Sudoku = dict(zip(range(81), candidates))
-        return SudokuChromosome(values)
+        return SudokuChromosome(candidates)
 
     def crossover(self, other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
-        # row_col_range = random.choice(_get_row_ranges(), _get_col_ranges())
         left_partition, right_partition = sorted(random.sample(range(81), k=2))
-        print(list(self.values.items()))
         assert left_partition < right_partition
-        child_values1: Sudoku = {
-            **dict(list(self.values.items())[:left_partition]),
-            **dict(list(other.values.items())[left_partition:right_partition]),
-            **dict(list(self.values.items())[right_partition:]),
-        }
-        child_values2: Sudoku = {
-            **dict(list(other.values.items())[:left_partition]),
-            **dict(list(self.values.items())[left_partition:right_partition]),
-            **dict(list(other.values.items())[right_partition:]),
-        }
-        # fmt: off
-        assert sum(child_values1.values()) + sum(child_values2.values()) == sum(self.values.values()) + sum(other.values.values())  # noqa: E501
+        child_values1: Sudoku = [
+            *self.values[:left_partition],
+            *other.values[left_partition:right_partition],
+            *self.values[right_partition:],
+        ]
+        child_values2: Sudoku = [
+            *other.values[:left_partition],
+            *self.values[left_partition:right_partition],
+            *other.values[right_partition:],
+        ]
+        assert sum(child_values1) + sum(child_values2) == sum(self.values) + sum(other.values)
         return SudokuChromosome(child_values1), SudokuChromosome(child_values2)
 
     def mutate(self) -> "SudokuChromosome":
-        mutated_values: Sudoku = {**self.values}
+        mutated_values: Sudoku = [*self.values]
         for i in random.sample(range(81), k=3):
             mutated_values[i] = random.randint(1, 9)
         return SudokuChromosome(mutated_values)

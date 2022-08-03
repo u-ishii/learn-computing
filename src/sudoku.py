@@ -1,7 +1,7 @@
 import time
-from typing import Dict, List
+from typing import List
 
-Sudoku = Dict[int, int]
+Sudoku = List[int]
 
 
 def print_sudoku_history(sudoku_history: List[Sudoku]) -> None:
