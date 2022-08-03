@@ -78,9 +78,13 @@ class SudokuChromosome(Chromosome):
         return SudokuChromosome(child_values1), SudokuChromosome(child_values2)
 
     def mutate(self) -> "SudokuChromosome":
+        candidates = list(range(1, 10))
+        times = {i: 0 for i in candidates}
+        for value in self.values:
+            times[value] += 1
+        new_value = sorted(candidates, key=lambda x: times[x])[0]
         mutated_values: Sudoku = [*self.values]
-        for i in random.sample(range(81), k=3):
-            mutated_values[i] = random.randint(1, 9)
+        mutated_values[random.choice(range(81))] = new_value
         return SudokuChromosome(mutated_values)
 
     def __str__(self) -> str:
