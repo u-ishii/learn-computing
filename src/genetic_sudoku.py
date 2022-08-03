@@ -11,7 +11,7 @@ def main() -> None:
     algorithm: GeneticAlgorithm[SudokuChromosome] = GeneticAlgorithm(
         initial_population=initial_population,
         threshold=9 * 9 * 3,
-        mutation_chance=0.1,
+        mutation_chance=0.05,
         max_generations=10000,
     )
     result = algorithm.run()
@@ -75,8 +75,8 @@ class SudokuChromosome(Chromosome):
 
     def mutate(self) -> "SudokuChromosome":
         mutated_values: Sudoku = {**self.values}
-        i1, i2 = random.sample(range(81), k=2)
-        mutated_values[i1], mutated_values[i2] = mutated_values[i2], mutated_values[i1]
+        for i in random.sample(range(81), k=3):
+            mutated_values[i] = random.randint(1, 9)
         return SudokuChromosome(mutated_values)
 
     def __str__(self) -> str:
