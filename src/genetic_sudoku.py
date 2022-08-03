@@ -63,12 +63,20 @@ class SudokuChromosome(Chromosome):
         return SudokuChromosome(values)
 
     def crossover(self, other: "SudokuChromosome") -> Tuple["SudokuChromosome", "SudokuChromosome"]:
-        child_values1: Sudoku = {**self.values}
-        child_values2: Sudoku = {**other.values}
-        for row_col_range in random.choice((_get_row_ranges(), _get_col_ranges())):
-            for i in row_col_range:
-                if random.choice((True, False)):
-                    child_values1[i], child_values2[i] = child_values2[i], child_values1[i]
+        # row_col_range = random.choice(_get_row_ranges(), _get_col_ranges())
+        left_partition, right_partition = sorted(random.sample(range(81), k=2))
+        print(list(self.values.items()))
+        assert left_partition < right_partition
+        child_values1: Sudoku = {
+            **dict(list(self.values.items())[:left_partition]),
+            **dict(list(other.values.items())[left_partition:right_partition]),
+            **dict(list(self.values.items())[right_partition:]),
+        }
+        child_values2: Sudoku = {
+            **dict(list(other.values.items())[:left_partition]),
+            **dict(list(self.values.items())[left_partition:right_partition]),
+            **dict(list(other.values.items())[right_partition:]),
+        }
         # fmt: off
         assert sum(child_values1.values()) + sum(child_values2.values()) == sum(self.values.values()) + sum(other.values.values())  # noqa: E501
         return SudokuChromosome(child_values1), SudokuChromosome(child_values2)
