@@ -23,7 +23,7 @@ class Chromosome(ABC):
         ...
 
     @abstractmethod
-    def mutate(self) -> None:
+    def mutate(self: T) -> T:
         ...
 
 
@@ -72,19 +72,14 @@ class GeneticAlgorithm(Generic[C]):
     def _reproduce_and_replace(self) -> None:
         new_population: List[C] = []
         while len(new_population) < len(self._population):
-            parents = self._pick_parents()
             if random.random() < self._crossover_chance:
+                parents = self._pick_parents()
                 new_population.extend(parents[0].crossover(parents[1]))
+            elif random.random() < self._mutation_chance:
+                new_population.append(self._pick_parents()[0].mutate())
             else:
-                new_population.extend(parents)
-        if len(new_population) > len(self._population):
-            new_population.pop()
-        self._population = new_population
-
-    def _mutate(self) -> None:
-        for individual in self._population:
-            if random.random() < self._mutation_chance:
-                individual.mutate()
+                new_population.append(self._pick_parents()[0])
+        self._population = new_population[: len(self._population)]
 
     def run(self) -> C:
         best: C = max(self._population, key=self._fitness_key)
@@ -93,7 +88,6 @@ class GeneticAlgorithm(Generic[C]):
                 return best
             print(f"Generation {generation} Best {best.fitness()} Avg {mean(map(self._fitness_key, self._population))}")
             self._reproduce_and_replace()
-            self._mutate()
             highest: C = max(self._population, key=self._fitness_key)
             if highest.fitness() > best.fitness():
                 best = highest
