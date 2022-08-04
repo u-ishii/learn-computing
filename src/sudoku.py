@@ -22,7 +22,9 @@ def convert_sudoku_text(sudoku: Sudoku) -> str:
             if x != 0 and x % 3 == 0:
                 number_line += "│"
             i = y * 9 + x
-            cell = chr(ord("０") + sudoku[i]) if i in sudoku else "  "
+            if sudoku[i] is None:
+                raise RuntimeError()
+            cell = chr(ord("０") + sudoku[i])
             number_line += cell
         lines.append(number_line)
     return "\n".join(lines)
